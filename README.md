@@ -30,6 +30,20 @@ A example of invoking the training script to train the U-net:
 python train_landsat.py --model unet
 ```
 
+# Fine-tuning with Sentinel-2 images
+
+After training the base models you can fine-tune them using the Sentinel-2 images. First, you need to define the CSV files that contains the folds that will be used to train, validate and test the models. Use the script `src/generate_folds.py` to create the this files. You can change the configuration of this script in the file `src/config.py`. The constant `MANUAL_ANNOTATIONS_IMAGE_PATH` must point to the folder holding the Sentinel-2 patches, the constant `MANUAL_ANNOTATIONS_MASK_PATH` must point to the manual annotations and the `SEAMLINE_IMAGES_PATH` must point to the folder with the seam-line patches. The code will check your images, counting  the fire pixels in each image, a summary will be saved in the file defined in the `CSV_NUM_FIRE_PIXELS_PER_PATCH_PATH` constant. The number of folds is defined by the constant `NUM_FOLDS` the default value is 5. If you want to use stratified folds, based in the categories `fire`, `seam-line` and `no-fire` you can set the constant `STRATIFIED_FOLDS` to `True`, the default is `False`. After setting the configurations in the `config.py` you can run the script:
+
+```
+python generate_folds.py
+```
+
+This code will set one split to test and one split to validation, all others splits will be used to train. If you don't want to define a validation fold you can set `GENERATE_VALIDATION_FOLD` to `False`.
+
+With the folds defined you can fine-tune the network using the Sentinel-2 images. The script `src/transfer_learning.py` can be used to this task. The configurations used in this script is also defined in the `src/config.py` script. Alternatively, you can change the default configuration using the arguments available in the fine-tuning script. You can use the `--model` argument to define the base model (unet, deeplabv3+ or SegFormerB0) to fine-tune. The `--csv-folds-dir` argument can be used to point to the folder with the csv files with the folds definition, if you want to use specify the folds to be used you can set them in the `--fold` argument. You can also change the number of epochs to fine-tune the model with the argument `--epochs`, if you want to use the networks without any fine-tuning you can set the number of epochs to zero, this will only evaluate the model. Alternatively you can pass the argument `--no-tuning`, this will disable the fine-tuning step and execute only the evaluation.
+
+When running this script it will fine-tuning and evalute the model using the defined folds. After the fine-tuning step it will be saved the history in a json file inside the folder defined in the `OUTPUT_RESULTS_TRANSFER_LEARNING_PATH` constant, the weights will be saved in the folder defined in `OUTPUT_WEIGHTS_TRANSFER_LEARNING_PATH`, the results of the evaluation over the test fold will be saved in the folder `OUTPUT_RESULTS_TRANSFER_LEARNING_PATH` as a json file. 
+
 
 # Citation
 
