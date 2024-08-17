@@ -16,9 +16,16 @@ This work analyze three different architectures (U-net, Deeplab v3+ and SegForme
 
 To pre-train the networks we use the Landsat-8 of the dataset built by [Pereira et al. (2021)](https://www.sciencedirect.com/science/article/abs/pii/S092427162100160X). The dataset consists of images from around the world with active fire and their respective masks produced by three threshold algorithms and their combination by intersection and majority voting. In this work we use only the majority **voting masks**.
 
-With the networks trained on Landsat-8 images, we fine-tune then using Sentinel-2 images manually annotated, we use the dataset built by [Fusioka et al. (2024)](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10620606). This dataset consist of 26 Sentinel-2 images manually annotated, which has 22 images with at least one fire pixel and 4 images without any fire pixel. While the dataset offer the images in patches (images cropped in 256x256 pixels), we choose to discard the patches with only no-data (black images) or partially with no-data. 
+With the networks trained on Landsat-8 images, we fine-tune then using Sentinel-2 images manually annotated, we use the dataset built by [Fusioka et al. (2024)](https://ieeexplore.ieee.org/document/10620606). This dataset consist of 26 Sentinel-2 images manually annotated, which has 22 images with at least one fire pixel and 4 images without any fire pixel. While the dataset offer the images in patches (images cropped in 256x256 pixels), we choose to discard the patches with only no-data (black images) or partially with no-data. 
 
 In addition to these dataset we analyzed a set of Sentinel-2 images without fire, but with seam-lines (artifacts caused by the composition of multiple captures, a known issue that results in misaligned bands visible in regions with clouds) that cause false positives in the active fire segmentation task.
+
+
+## Adjusting Sentinel-2 images
+
+As mentioned before, we have made a small change in the dataset provided by [Fusioka et al. (2024)](https://ieeexplore.ieee.org/document/10620606), we chose to not use the patches with "no-data". We provide two distinct scripts to adjust the dataset, the first script is the `src/utils/crop_images.py` this script can be used to crop the Sentinel-2 scenes available in the dataset. We also provide the script `src/utils/remove_no_data_patches.py` that will remove any patch with "no-data" from the samples.
+
+
 
 # Training with Landsat-8 images
 
@@ -42,12 +49,12 @@ This code will set one split to test and one split to validation, all others spl
 
 With the folds defined you can fine-tune the network using the Sentinel-2 images. The script `src/transfer_learning.py` can be used to this task. The configurations used in this script is also defined in the `src/config.py` script. Alternatively, you can change the default configuration using the arguments available in the fine-tuning script. You can use the `--model` argument to define the base model (unet, deeplabv3+ or SegFormerB0) to fine-tune. The `--csv-folds-dir` argument can be used to point to the folder with the csv files with the folds definition, if you want to use specify the folds to be used you can set them in the `--fold` argument. You can also change the number of epochs to fine-tune the model with the argument `--epochs`, if you want to use the networks without any fine-tuning you can set the number of epochs to zero, this will only evaluate the model. Alternatively you can pass the argument `--no-tuning`, this will disable the fine-tuning step and execute only the evaluation.
 
-When running this script it will fine-tuning and evalute the model using the defined folds. After the fine-tuning step it will be saved the history in a json file inside the folder defined in the `OUTPUT_RESULTS_TRANSFER_LEARNING_PATH` constant, the weights will be saved in the folder defined in `OUTPUT_WEIGHTS_TRANSFER_LEARNING_PATH`, the results of the evaluation over the test fold will be saved in the folder `OUTPUT_RESULTS_TRANSFER_LEARNING_PATH` as a json file. 
+When running this script it will fine-tuning and evaluate the model using the defined folds. After the fine-tuning step it will be saved the history in a json file inside the folder defined in the `OUTPUT_RESULTS_TRANSFER_LEARNING_PATH` constant, the weights will be saved in the folder defined in `OUTPUT_WEIGHTS_TRANSFER_LEARNING_PATH`, the results of the evaluation over the test fold will be saved in the folder `OUTPUT_RESULTS_TRANSFER_LEARNING_PATH` as a json file. 
 
 
 # Citation
 
-Full article is available in [IEEE Xplore](https://ieeexplore.ieee.org/document/10636193). Bibtex citation:
+Full article is available in [IEEEXplore](https://ieeexplore.ieee.org/document/10636193). Bibtex citation:
 
 ```bibtex
 @ARTICLE{Fusioka2024,
